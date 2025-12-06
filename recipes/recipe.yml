@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=./recipe.json
+# yaml-language-server: $schema=./recipe.json # FIX: Changed to local path
 name: ShardOS
 description: Specialized host image for high-performance VMs and containers with dGPU passthrough and Image Building capabilities.
 
@@ -126,7 +126,7 @@ modules:
   # 6. GNOME DESKTOP MINIMALISM
   - type: gnome
     integrated-gpu-priority: true
-    remove: [] # Explicitly empty list to satisfy the schema
+    remove: [] # Explicitly empty list to satisfy the schema validator
 
   # 7. DEFAULT FLATPAKS: System Scope Apps
   - type: default-flatpaks
