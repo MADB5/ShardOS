@@ -8,16 +8,20 @@ base-image: ghcr.io/ublue-os/silverblue-main-zen
 image-version: latest
 
 modules:
-  # FILES: Copy custom configuration files from the 'files/' directory into the root filesystem
   - type: files
     files:
       - source: system
         destination: /
 
+  # ADDED: Installs the ujust utility for running maintenance scripts
+  - type: ujust
+
+  # ADDED: Enables automatic background updates and desktop notifications
+  - type: update-system 
+
   # 2. DNF/RPM-OSTREE: Install all core host packages and remove unwanted desktop RPMs
   - type: dnf
     repos:
-      # Custom COPR for specific user tools
       copr:
         - atim/starship
     install:
@@ -29,11 +33,11 @@ modules:
       - qemu-kvm
       - libvirt
       - libvirt-client
-      - libvirt-daemon-kvm       # Critical for KVM hardware acceleration
+      - libvirt-daemon-kvm
       - libvirt-daemon-config-network
       - virt-install
-      - edk2-ovmf                 # UEFI Firmware for modern guests
-      - virt-viewer               # Remote console viewer
+      - edk2-ovmf
+      - virt-viewer
       
       # CONTAINER MANAGEMENT (Core Tools)
       - podman
@@ -44,25 +48,25 @@ modules:
       - cockpit
       - cockpit-machines 
       - cockpit-podman
-      - cockpit-files           # Cockpit file browser
-      - cockpit-networkmanager  # Cockpit network module
-      - cockpit-selinux         # Cockpit SELinux module
+      - cockpit-files
+      - cockpit-networkmanager
+      - cockpit-selinux
       - cockpit-packagekit
       - cockpit-storaged
       - cockpit-pcp
-      - pcp                     # Core PCP package
-      - python3-pcp             # Python bindings for PCP
+      - pcp
+      - python3-pcp
       - pcp-system-tools
-      - tuned                   # System performance tuner for 'virtual-host' profile
+      - tuned
       - sysstat
       
       # NETWORKING, STORAGE & FIREWALL
-      - firewalld               # Host firewall
+      - firewalld
       - iptables
       - openssh-server
-      - cryptsetup              # Disk encryption utility
-      - lvm2                    # Logical Volume Manager
-      - mdadm                   # Software RAID manager
+      - cryptsetup
+      - lvm2
+      - mdadm
       
       # SECURITY & AUTHENTICATION
       - policycoreutils-python-utils 
@@ -71,13 +75,13 @@ modules:
       - setools-console
       
       # HARDWARE FIRMWARE
-      - fwupd                   # Firmware Updater
-      - amd-ucode-firmware      # AMD Microcode
-      - microcode_ctl           # Intel/AMD Microcode Control
+      - fwupd
+      - amd-ucode-firmware
+      - microcode_ctl
       
       # OSBUILD COMPOSER
-      - osbuild-composer        # Core Image Building Service
-      - composer-cli            # Command line client for OSBuild
+      - osbuild-composer
+      - composer-cli
       
     remove: # Removing unnecessary desktop RPMs
       packages:
@@ -93,13 +97,13 @@ modules:
   # 3. SERVICES: Enable essential daemons on boot
   - type: services
     enable:
-      - libvirtd.service        # Virtualization daemon
-      - pmlogger.service        # PCP logging service
-      - osbuild-composer.socket # Image Builder service
+      - libvirtd.service
+      - pmlogger.service
+      - osbuild-composer.socket
 
   # 4. GNOME DESKTOP MINIMALISM & iGPU ENFORCEMENT
   - type: gnome
-    integrated-gpu-priority: true # Ensures iGPU is used, leaving dGPU for passthrough
+    integrated-gpu-priority: true
     remove: 
       - gnome-tour
       - gnome-shell-extension-background-logo
@@ -112,10 +116,10 @@ modules:
       - notify: true
         scope: system
         install: 
-          - app.zen_browser.zen       # Browser for Cockpit access
-          - org.gnome.Loupe           # Image viewer
-          - io.podman_desktop.PodmanDesktop # Container/VM management GUI
-          - org.virt_manager.VirtManager    # Traditional VM management GUI
+          - app.zen_browser.zen
+          - org.gnome.Loupe
+          - io.podman_desktop.PodmanDesktop
+          - org.virt_manager.VirtManager
       - scope: user 
 
   # 6. SIGNING: Essential for secure image verification
