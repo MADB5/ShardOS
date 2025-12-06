@@ -123,10 +123,10 @@ modules:
         url: https://flathub.org/repo/flathub.flatpakrepo
         system: true
 
-  # 6. GNOME DESKTOP MINIMALISM
+  # 6. GNOME DESKTOP MINIMALISM (FIXED SCHEMA)
   - type: gnome
     integrated-gpu-priority: true
-    # 'remove' section is intentionally empty here
+    remove: [] # FIX: Explicitly empty list to satisfy the schema
 
   # 7. DEFAULT FLATPAKS: System Scope Apps
   - type: default-flatpaks
