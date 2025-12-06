@@ -93,7 +93,7 @@ modules:
       
     remove: 
       packages:
-        # Remove Base OS applications
+        # CONSOLIDATED REMOVALS LIST
         - firefox
         - firefox-langpacks
         - gnome-calculator
@@ -101,7 +101,12 @@ modules:
         - gnome-maps
         - totem
         - yelp
-        - gnome-text-editor 
+        - gnome-text-editor
+        # REMOVED FROM type: gnome MODULE
+        - gnome-tour
+        - gnome-shell-extension-background-logo
+        - rhythmbox
+        - baobab
 
   # 4. SERVICES: Enable essential daemons
   - type: services
@@ -119,14 +124,10 @@ modules:
         url: https://flathub.org/repo/flathub.flatpakrepo
         system: true
 
-  # 6. GNOME DESKTOP MINIMALISM
+  # 6. GNOME DESKTOP MINIMALISM (REMOVAL LIST IS NOW EMPTY)
   - type: gnome
     integrated-gpu-priority: true
-    remove: 
-      - gnome-tour
-      - gnome-shell-extension-background-logo
-      - rhythmbox
-      - baobab 
+    # The 'remove' section was removed from here.
 
   # 7. DEFAULT FLATPAKS: System Scope Apps
   - type: default-flatpaks
