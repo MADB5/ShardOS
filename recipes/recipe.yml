@@ -1,65 +1,146 @@
-# This recipe defines the structure and contents of your custom ShardOS image.
-# It uses the Universal Blue (UB) framework and various modules.
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+name: ShardOS
+description: Specialized host image for high-performance VMs and containers with dGPU passthrough and Image Building capabilities.
 
-# -------------------------------------------------------------
-# BASE IMAGE
-# -------------------------------------------------------------
-name: shardos
-description: The custom operating system image for ShardOS.
-base-image: ghcr.io/ublue-os/kinoite-main # Or your preferred base image
+# 1. BASE IMAGE: Using the Zen Kernel variant for high performance and low latency
+base-image: ghcr.io/ublue-os/silverblue-main-zen
+image-version: latest
 
-# -------------------------------------------------------------
-# IMAGE TAGS & ARCHITECTURE
-# -------------------------------------------------------------
-# Define which architectures to build for (e.g., x86_64, aarch64)
-# arch: x86_64
-
-# -------------------------------------------------------------
-# MODULES
-# -------------------------------------------------------------
 modules:
-
   # 1. CORE SYSTEM FILES
-  # Merges files from the local 'files/system' directory into the OS root (e.g., /etc/motd)
   - type: files
     files:
       - source: system
         destination: /
 
-  # 2. DNF PACKAGE MANAGEMENT (Install/Remove RPMs)
-  - type: dnf
-    # Packages to REMOVE from the base image
-    remove:
-      # Fix for Issue: Ensure Firefox and its language packs are removed
-      - firefox
-      - firefox-langpacks
-    
-    # Packages to INSTALL into the base image
+  # 2. ADD EXTERNAL REPOSITORIES 🚨 NEW MODULE ADDED 🚨
+  # Installs the RPM files that define the repositories (RPM Fusion for codecs/drivers)
+  - type: rpm
     install:
+      # RPM Fusion (Free) for common software and multimedia codecs
+      - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+      # RPM Fusion (Non-Free) for proprietary drivers and software
+      - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+      
+      # NOTE: Starship COPR is handled in the 'type: dnf' module below.
+
+  # 3. DNF/RPM-OSTREE: Install Virtualization, Cockpit, SELinux Tools, and OSBuild Composer
+  - type: dnf
+    repos:
+      # COPR for up-to-date Starship prompt (if not in RPM Fusion)
+      copr:
+        - atim/starship
+    install:
+      # 🚨 CORE UPDATE TOOL ADDED 🚨
+      - ublue-update              # Core update management tool
+
+      # Essential user tools
+      - micro
+      - starship
+      
       # VIRTUALIZATION & KVM (Host Hypervisor)
       - qemu-kvm
+      - libvirt
+      - libvirt-client
+      - libvirt-daemon-kvm
       - libvirt-daemon-config-network
+      - virt-install
+      - edk2-ovmf             # UEFI Firmware
+      - virt-viewer           # Remote console viewer
       
-      # USER TOOLS
-      - micro # A terminal-based text editor
-      - starship # A customizable prompt for the shell
+      # CONTAINER MANAGEMENT (Core Tools)
+      - podman
+      - skopeo
+      - buildah
+      # 🚨 MISSING CONTAINER TOOLS ADDED 🚨
+      - podman-compose          # Compose support for Cockpit Compose
+      - podman-docker           # Docker compatibility symlinks
+      - containers-tools        # Utility tools
 
-  # 3. FLATPAK MANAGEMENT (Add/Remove Remotes and Apps)
+      # 4. MULTIMEDIA/CODECS (Requires RPM Fusion to be enabled)
+      - libavcodec-freeworld
 
-  # Fix for Issue: Remove the default Fedora Flatpak remote to prevent confusing notifications
-  - type: flatpak-remove
-    remove:
-      - remote: fedora
+      # SYSTEM MANAGEMENT, MONITORING, & TUNING
+      - cockpit
+      - cockpit-machines 
+      - cockpit-podman
+      - cockpit-files           # Cockpit file browser
+      - cockpit-networkmanager  # Cockpit network module
+      - cockpit-selinux         # Cockpit SELinux module
+      - cockpit-packagekit
+      - cockpit-storaged
+      - cockpit-pcp
+      - pcp                     # Core PCP package
+      - python3-pcp             # Python bindings for PCP
+      - pcp-system-tools
+      - tuned                   # System performance tuner
+      - sysstat
+      
+      # NETWORKING, STORAGE & FIREWALL
+      - firewalld               # Host firewall
+      - iptables
+      - openssh-server
+      - cryptsetup              # Disk encryption utility
+      - lvm2                    # Logical Volume Manager
+      - mdadm                   # Software RAID manager
+      
+      # SECURITY & AUTHENTICATION
+      - policycoreutils-python-utils 
+      - setroubleshoot-server
+      - audit
+      - setools-console
+      
+      # HARDWARE FIRMWARE
+      - fwupd                   # Firmware Updater
+      - amd-ucode-firmware      # AMD Microcode
+      - microcode_ctl           # Intel/AMD Microcode Control
+      
+      # OSBUILD COMPOSER
+      - osbuild-composer
+      - composer-cli
+      
+    remove: 
+      packages:
+        - firefox 
+        - firefox-langpacks 
+        - gnome-calculator
+        - gnome-contacts
+        - gnome-maps
+        - totem 
+        - yelp 
+        - gnome-text-editor 
 
-  # NEW: Install the Bazaar Flatpak app from Flathub
-  - type: flatpak-install
-    install:
-      - app-id: io.github.kolunmi.Bazaar
-        remote: flathub
+  # 4. SERVICES: Enable essential daemons
+  - type: services
+    enable:
+      - libvirtd.service 
+      - pmlogger.service 
+      - osbuild-composer.socket
+      # 🚨 COCKPIT SERVICE ADDED 🚨
+      - cockpit.socket
 
-  # 4. UJUST & UPDATES
-  # Adds the ujust management utility
-  - type: ujust
+  # 5. GNOME DESKTOP MINIMALISM & iGPU ENFORCEMENT
+  - type: gnome
+    integrated-gpu-priority: true
+    remove: 
+      - gnome-tour
+      - gnome-shell-extension-background-logo
+      - rhythmbox
+      - baobab 
 
-  # Configures automatic system updates
-  - type: update-system
+  # 6. DEFAULT FLATPAKS: Essential Host Management
+  - type: default-flatpaks
+    configurations:
+      - notify: true
+        scope: system
+        install: 
+          - app.zen_browser.zen 
+          - org.gnome.Loupe
+          # 🚨 BAZAAR FLATPAK ADDED 🚨
+          - io.github.kolunmi.Bazaar
+          - io.podman_desktop.PodmanDesktop 
+          - org.virt_manager.VirtManager 
+      - scope: user 
+
+  # 7. SIGNING (No change needed)
+  - type: signing
