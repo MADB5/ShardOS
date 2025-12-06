@@ -19,7 +19,7 @@ modules:
       - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
       - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
-  # 3. DNF/RPM-OSTREE: Package Management
+  # 3. DNF/RPM-OSTREE: Package Management (Install/Remove)
   - type: dnf
     repos:
       # Starship COPR
@@ -93,7 +93,7 @@ modules:
       
     remove: 
       packages:
-        # CONSOLIDATED REMOVALS LIST
+        # CONSOLIDATED REMOVALS (All desktop apps removed here)
         - firefox
         - firefox-langpacks
         - gnome-calculator
@@ -102,7 +102,6 @@ modules:
         - totem
         - yelp
         - gnome-text-editor
-        # REMOVED FROM type: gnome MODULE
         - gnome-tour
         - gnome-shell-extension-background-logo
         - rhythmbox
@@ -124,10 +123,10 @@ modules:
         url: https://flathub.org/repo/flathub.flatpakrepo
         system: true
 
-  # 6. GNOME DESKTOP MINIMALISM (REMOVAL LIST IS NOW EMPTY)
+  # 6. GNOME DESKTOP MINIMALISM
   - type: gnome
     integrated-gpu-priority: true
-    # The 'remove' section was removed from here.
+    # 'remove' section is intentionally empty here
 
   # 7. DEFAULT FLATPAKS: System Scope Apps
   - type: default-flatpaks
