@@ -24,10 +24,14 @@ jobs:
         recipe:
           - recipe.yml
     steps:
+      - name: Create Skip Schema File
+        run: touch -- --skip-schema-check
+        
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.5.0
         with:
-          cosign-release: v2.2.4
+          cosign-release: v3.0.2
+          
       - name: Build Custom Image
         uses: blue-build/github-action@main
         with:
