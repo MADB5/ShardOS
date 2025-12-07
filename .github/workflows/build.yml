@@ -40,22 +40,25 @@ jobs:
           # Default to no signing
           SIGN=false
           # Parse the first document's build.sign value if present
-          SIGN=$(awk 'BEGIN{in=0} /^build:/ {in=1; next} in && $1=="sign:" {print $2; exit} /^---/ {in=0}' recipes/recipe.yml || true)
+          # Using 'flag' instead of 'in' to avoid awk reserved word issues
+          SIGN=$(awk 'BEGIN{flag=0} /^build:/ {flag=1; next} flag && $1=="sign:" {print $2; exit} /^---/ {flag=0}' recipes/recipe.yml || true)
           if [ -z "$SIGN" ]; then SIGN=false; fi
           echo "Detected recipe.build.sign='$SIGN'"
           if [ "$SIGN" = "true" ]; then
             # Empty build_opts means signing is enabled (no --no-sign flag)
-            echo "build_opts=" > "$GITHUB_OUTPUT"
+            echo "build_opts=" >> "$GITHUB_OUTPUT"
+            echo "sign_enabled=true" >> "$GITHUB_OUTPUT"
           else
-            echo "build_opts=--no-sign" > "$GITHUB_OUTPUT"
+            echo "build_opts=--no-sign" >> "$GITHUB_OUTPUT"
+            echo "sign_enabled=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run restore script
-        if: steps.set_build_opts.outputs.build_opts == ''
+        if: steps.set_build_opts.outputs.sign_enabled == 'true'
         run: |
-          .github/scripts/restore-cosign-keys.sh
+          .github/scripts/restore-cosign-keys. sh
         env:
-          SIGNING_SECRET: ${{ secrets.SIGNING_SECRET }}
+          SIGNING_SECRET: ${{ secrets. SIGNING_SECRET }}
 
       - name: Build Custom Image
         uses: blue-build/github-action@v1.10.2
