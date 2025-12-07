@@ -31,7 +31,7 @@ jobs:
           fetch-depth: 0
           
       - name: Maximize Build Space
-        uses: jlumbroso/free-disk-space@v0.1.4
+        uses: jlumbroso/free-disk-space@v0.5
         with:
           tool-cache: true
           android: true
