@@ -24,13 +24,11 @@ jobs:
         recipe:
           - recipe.yml
     steps:
-      - name: Create Skip Schema File
-        run: touch -- --skip-schema-check
-        
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@v4.0.0
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          cosign-release: v3.0.2
+          submodules: recursive
+          fetch-depth: 0
           
       - name: Build Custom Image
         uses: blue-build/github-action@v1.9.1
@@ -40,4 +38,3 @@ jobs:
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}
           maximize_build_space: true
-          build_opts: '-- --skip-schema-check'
