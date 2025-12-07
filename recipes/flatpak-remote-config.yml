@@ -1,4 +1,5 @@
-remotes:
-  install:
-    - remote: flathub
-      url: https://flathub.org/repo/flathub.flatpakrepo
+config:
+  remotes:
+    install:
+      - remote: flathub
+        url: https://flathub.org/repo/flathub.flatpakrepo
