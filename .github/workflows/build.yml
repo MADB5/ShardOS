@@ -1,3 +1,4 @@
+# .github/workflows/build.yml (personal-use variant)
 name: bluebuild
 on:
   schedule:
@@ -17,7 +18,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write
+      id-token: write   # keep for keyless signing/OIDC if you prefer it
     strategy:
       fail-fast: false
       matrix:
@@ -29,11 +30,49 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-          
+
+      - name: Determine build options for signing
+        id: set_build_opts
+        shell: bash
+        run: |
+          # If either a public or private cosign key is provided via secrets,
+          # enable signing (leave build_opts empty). Otherwise force --no-sign.
+          if [ -n "${{ secrets.COSIGN_PUB }}" ] || [ -n "${{ secrets.COSIGN_PRIVATE_KEY }}" ]; then
+            echo "build_opts=" >> "$GITHUB_OUTPUT"
+          else
+            echo "build_opts=--no-sign" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Inject cosign public key (optional)
+        if: ${{ secrets.COSIGN_PUB != '' }}
+        shell: bash
+        run: |
+          # Preserve exact content; avoid shell expansions
+          printf '%s' "${{ secrets.COSIGN_PUB }}" > ./cosign.pub
+          chmod 644 ./cosign.pub
+
+      - name: Inject cosign private key (optional and sensitive)
+        if: ${{ secrets.COSIGN_PRIVATE_KEY != '' }}
+        shell: bash
+        run: |
+          # Only write the private key when explicitly provided. Prefer keyless signing.
+          printf '%s' "${{ secrets.COSIGN_PRIVATE_KEY }}" > ./cosign.key
+          chmod 600 ./cosign.key
+
+      - name: Provide cosign password (optional)
+        if: ${{ secrets.COSIGN_PASSWORD != '' }}
+        run: |
+          echo "COSIGN_PASSWORD will be available to the build step via env (masked)."
+        # no secret is printed; GitHub masks secrets automatically
+
       - name: Build Custom Image
         uses: blue-build/github-action@v1.10.2
         with:
           recipe: ${{ matrix.recipe }}
-          build_opts: "--no-sign"
+          build_opts: ${{ steps.set_build_opts.outputs.build_opts }}
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}
+        env:
+          BUILD_OPTS: ${{ steps.set_build_opts.outputs.build_opts }}
+          # Pass COSIGN_PASSWORD into the runner environment if provided (masked)
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
