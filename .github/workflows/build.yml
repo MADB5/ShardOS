@@ -51,5 +51,28 @@ jobs:
         env:
           BUILD_OPTS: ${{ steps.set_build_opts.outputs.build_opts }}
 
-      - name: Build and sign image (force no-sign)
-        run: bluebuild build --no-sign
+      - name: Debug build options
+        shell: bash
+        run: |
+          echo "Resolved build_opts='${{ steps.set_build_opts.outputs.build_opts }}'"
+          echo "ENV BUILD_OPTS='${BUILD_OPTS:-}'"
+          # Optional: show bluebuild version for debugging (no failure if not installed)
+          bluebuild --version || true
+        env:
+          BUILD_OPTS: ${{ steps.set_build_opts.outputs.build_opts }}
+
+      - name: Build image (explicitly skip signing)
+        shell: bash
+        run: |
+          # Ensure we explicitly pass --no-sign to avoid any signing attempt
+          bluebuild build --no-sign
+        env:
+          BUILD_OPTS: ${{ steps.set_build_opts.outputs.build_opts }}
+
+      - name: Push image (explicitly skip signing)
+        shell: bash
+        run: |
+          # Explicitly push and skip signing to prevent cosign/key related failures
+          bluebuild push --no-sign
+        env:
+          BUILD_OPTS: ${{ steps.set_build_opts.outputs.build_opts }}
