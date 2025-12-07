@@ -1,40 +1,101 @@
-# .github/workflows/build.yml (use the ref in the job: a9d8a3243a7e16611cbd4dbb2ba1e28b840808ab)
-- name: Determine build options for signing (force no-sign)
-  id: set_build_opts
-  shell: bash
-  run: |
-    # keep the output but do not rely on it as the single source of truth
-    echo "build_opts=--no-sign" >> "$GITHUB_OUTPUT"
+name: bluebuild
+on:
+  schedule:
+    - cron: "00 06 * * *"
+  push:
+    paths-ignore:
+      - "**.md"
+  pull_request:
+  workflow_dispatch:
 
-- name: Build Custom Image
-  uses: blue-build/github-action@v1.10.2
-  with:
-    recipe: ${{ matrix.recipe }}
-    build_opts: '--no-sign'                   # <-- explicit literal
-    registry_token: ${{ github.token }}
-    pr_event_number: ${{ github.event.number }}
-  env:
-    BUILD_OPTS: '--no-sign'                    # <-- explicit literal
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
 
-- name: Debug build options
-  shell: bash
-  run: |
-    echo "Resolved build_opts='${{ steps.set_build_opts.outputs.build_opts }}'"
-    echo "ENV BUILD_OPTS='${BUILD_OPTS:-}'"
-    bluebuild --version || true
-  env:
-    BUILD_OPTS: '--no-sign'
+jobs:
+  bluebuild:
+    name: Build Custom Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        recipe:
+          - recipe.yml
 
-- name: Build image (explicitly skip signing)
-  shell: bash
-  run: |
-    bluebuild build --no-sign
-  env:
-    BUILD_OPTS: '--no-sign'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
 
-- name: Push image (explicitly skip signing)
-  shell: bash
-  run: |
-    bluebuild push --no-sign
-  env:
-    BUILD_OPTS: '--no-sign'
+      - name: Determine build options for signing (scan recipe)
+        id: set_build_opts
+        shell: bash
+        run: |
+          # Default to no signing
+          SIGN=false
+          # Parse the first document's build.sign value if present
+          SIGN=$(awk 'BEGIN{in=0} /^build:/ {in=1; next} in && $1=="sign:" {print $2; exit} /^---/ {in=0}' recipes/recipe.yml || true)
+          if [ -z "$SIGN" ]; then SIGN=false; fi
+          echo "Detected recipe.build.sign='$SIGN'"
+          if [ "$SIGN" = "true" ]; then
+            # Empty build_opts means signing is enabled (no --no-sign flag)
+            echo "build_opts=" > "$GITHUB_OUTPUT"
+          else
+            echo "build_opts=--no-sign" > "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run restore script
+        if: steps.set_build_opts.outputs.build_opts == ''
+        run: |
+          .github/scripts/restore-cosign-keys.sh
+        env:
+          COSIGN_KEY_B64: ${{ secrets.COSIGN_KEY_B64 }}
+          COSIGN_PUB_B64: ${{ secrets.COSIGN_PUB_B64 }}
+
+      - name: Build Custom Image
+        uses: blue-build/github-action@v1.10.2
+        with:
+          recipe: ${{ matrix.recipe }}
+          build_opts: ${{ steps.set_build_opts.outputs.build_opts }}
+          registry_token: ${{ github.token }}
+          pr_event_number: ${{ github.event.number }}
+        env:
+          BUILD_OPTS: ${{ steps.set_build_opts.outputs.build_opts }}
+
+      - name: Debug build options
+        shell: bash
+        run: |
+          echo "Resolved build_opts='${{ steps.set_build_opts.outputs.build_opts }}'"
+          echo "ENV BUILD_OPTS='${BUILD_OPTS:-}'"
+          bluebuild --version || true
+        env:
+          BUILD_OPTS: ${{ steps.set_build_opts.outputs.build_opts }}
+
+      - name: Build image (explicitly pass build_opts)
+        shell: bash
+        run: |
+          # Use BUILD_OPTS environment variable which is set above
+          if [ -n "${BUILD_OPTS:-}" ]; then
+            bluebuild build ${BUILD_OPTS}
+          else
+            bluebuild build
+          fi
+        env:
+          BUILD_OPTS: ${{ steps.set_build_opts.outputs.build_opts }}
+
+      - name: Push image (explicitly pass build_opts)
+        shell: bash
+        run: |
+          if [ -n "${BUILD_OPTS:-}" ]; then
+            bluebuild push ${BUILD_OPTS}
+          else
+            bluebuild push
+          fi
+        env:
+          BUILD_OPTS: ${{ steps.set_build_opts.outputs.build_opts }}

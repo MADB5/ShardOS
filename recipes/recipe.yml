@@ -1,5 +1,8 @@
 name: ShardOS description: Specialized host image for high-performance VMs and containers with dGPU passthrough and Image Building capabilities. base-image: ghcr.io/ublue-os/silverblue-beta-zen image-version: latest
 
+build:
+  sign: false
+
 modules:
 
     type: files files:
