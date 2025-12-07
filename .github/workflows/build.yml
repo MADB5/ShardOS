@@ -30,12 +30,6 @@ jobs:
           submodules: recursive
           fetch-depth: 0
           
-      - name: Maximize Build Space
-        uses: jlumbroso/free-disk-space@6f90d5658e4612347101e403c62c2f8832a4e217
-        with:
-          tool-cache: true
-          android: true
-
       - name: Build Custom Image
         uses: blue-build/github-action@v1.9.1
         with:
