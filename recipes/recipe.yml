@@ -79,8 +79,18 @@ modules:
       copr:
         - atim/starship
 
-  - from-file: service-config.yml
-  - from-file: flatpak-remote-config.yml
+  - type: systemd
+    enable:
+      - libvirtd.service
+      - virtlogd.service
+      - virtqemud.service
+      - sshd.service
+      - cockpit.socket
+      - firewalld.service
+      - tuned.service
+      - pmcd.service
+      - pmlogger.service
+      - auditd.service
 
   - type: default-flatpaks
     configurations:
