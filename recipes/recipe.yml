@@ -106,4 +106,4 @@ modules:
           - org.mozilla.firefox
       - scope: user 
 
-  - type: signing
+# ❌ REMOVED: - type: signing
