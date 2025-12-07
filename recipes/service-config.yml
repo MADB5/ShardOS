@@ -1,5 +1,6 @@
-enable:
-  - libvirtd.service 
-  - pmlogger.service 
-  - osbuild-composer.socket
-  - cockpit.socket
+config:
+  enable:
+    - libvirtd.service 
+    - pmlogger.service 
+    - osbuild-composer.socket
+    - cockpit.socket
