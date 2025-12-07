@@ -41,5 +41,4 @@ jobs:
           pr_event_number: ${{ github.event.number }}
           use_unstable_cli: true
           maximize_build_space: true
-          # Provide the private key content to the action if supported:
-          cosign_private_key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          # cosign_private_key removed; the action should read from cosign.key if needed
