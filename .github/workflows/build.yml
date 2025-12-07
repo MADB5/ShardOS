@@ -19,7 +19,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Optionally inject public key from secret if you don't commit cosign.pub
+      # Recreate cosign public key from secret at runtime
       - name: Provide cosign public key (from secret)
         env:
           COSIGN_PUB: ${{ secrets.COSIGN_PUB }}
@@ -31,7 +31,7 @@ jobs:
             echo "COSIGN_PUB not set; skipping cosign.pub creation"
           fi
 
-      # Provide private key file for actions/tools that expect a file (kept only in runner)
+      # Recreate cosign private key from secret at runtime
       - name: Provide cosign private key (from secret)
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
@@ -51,4 +51,4 @@ jobs:
           pr_event_number: ${{ github.event.number }}
           use_unstable_cli: true
           maximize_build_space: true
-          # cosign_private_key removed; the action should read from cosign.key if needed
+          # No cosign_private_key input: bluebuild will use cosign.key / cosign.pub in the repo root
