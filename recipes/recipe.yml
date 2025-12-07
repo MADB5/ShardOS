@@ -1,314 +1,109 @@
-name: ShardOS description: Specialized host image for high-performance VMs and containers with dGPU passthrough and Image Building capabilities. base-image: ghcr.io/ublue-os/silverblue-beta-zen image-version: latest
-
-build:
-  sign: false
-
-modules:
-
-    type: files files:
-        source: system destination: /
-
-    type: rpm-ostree install:
-        https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
-        https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-        ublue-update
-        micro
-        starship
-        qemu-kvm
-        libvirt
-        libvirt-client
-        libvirt-daemon-kvm
-        libvirt-daemon-config-network
-        virt-install
-        edk2-ovmf
-        virt-viewer
-        podman
-        skopeo
-        buildah
-        podman-compose
-        podman-docker
-        containers-tools
-        libavcodec-freeworld
-        cockpit
-        cockpit-machines
-        cockpit-podman
-        cockpit-files
-        cockpit-networkmanager
-        cockpit-selinux
-        cockpit-packagekit
-        cockpit-storaged
-        cockpit-pcp
-        pcp
-        python3-pcp
-        pcp-system-tools
-        tuned
-        sysstat
-        firewalld
-        iptables
-        openssh-server
-        cryptsetup
-        lvm2
-        mdadm
-        policycoreutils-python-utils
-        setroubleshoot-server
-        audit
-        setools-console
-        fwupd
-        amd-ucode-firmware
-        microcode_ctl
-        osbuild-composer
-        composer-cli remove:
-        firefox
-        firefox-langpacks
-        gnome-calculator
-        gnome-contacts
-        gnome-maps
-        totem
-        yelp
-        gnome-text-editor
-        gnome-tour
-        gnome-shell-extension-background-logo
-        rhythmbox
-        baobab
-
-    type: dnf repos: copr: - atim/starship
-
-    type: systemd enable:
-        libvirtd.service
-        virtlogd.service
-        virtqemud.service
-        sshd.service
-        cockpit.socket
-        firewalld.service
-        tuned.service
-        pmcd.service
-        pmlogger.service
-        auditd.service
-
-    type: default-flatpaks configurations:
-        notify: true scope: system install:
-            app.zen_browser.zen
-            org.gnome.Loupe
-            io.podman_desktop.PodmanDesktop
-            org.virt_manager.VirtManager
-            io.github.kolunmi.Bazaar remove:
-            org.mozilla.firefox
-        scope: user
-
-Appended variant: ShardOS-CoreOS-Atomic-Variant
-Minimal atomic/CoreOS-style variant targeted at Fedora CoreOS / CoreOS-style immutable bases.
-
-name: ShardOS-CoreOS-Atomic-Variant description: Minimal atomic/CoreOS-style variant of ShardOS targeted at Fedora CoreOS / CoreOS-style immutable bases. base-image: quay.io/coreos/fedora-coreos:latest image-version: latest
-Metadata to help CI decide whether to sign. Current workflow forces --no-sign,
-but this flag lets CI be changed to consult the recipe instead.
-
-build: sign: false
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+name: ShardOS
+description: Specialized host image for high-performance VMs and containers with dGPU passthrough and Image Building capabilities.
+base-image: ghcr.io/ublue-os/silverblue-beta-zen
+image-version: latest
 
 modules:
+  - type: files
+    files:
+      - source: system
+        destination: /
 
-    type: files files:
-        source: system destination: /
-
-    type: rpm-ostree
-    Packages chosen to provide VM/container tooling and image building on an immutable host
-
+  - type: rpm-ostree
     install:
-        micro
-        starship
-        qemu-kvm
-        libvirt
-        libvirt-client
-        libvirt-daemon-kvm
-        libvirt-daemon-config-network
-        virt-install
-        edk2-ovmf
-        virt-viewer
-        podman
-        skopeo
-        buildah
-        podman-compose
-        podman-docker
-        containers-tools
-        osbuild-composer
-        composer-cli
-        cockpit
-        openssh-server
-        tuned
-        sysstat
-        firewalld remove:
-        firefox
-        firefox-langpacks
-        gnome-calculator
-        gnome-contacts
+      - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+      - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+      - ublue-update
+      - micro
+      - starship
+      - qemu-kvm
+      - libvirt
+      - libvirt-client
+      - libvirt-daemon-kvm
+      - libvirt-daemon-config-network
+      - virt-install
+      - edk2-ovmf
+      - virt-viewer
+      - podman
+      - skopeo
+      - buildah
+      - podman-compose
+      - podman-docker
+      - containers-tools
+      - libavcodec-freeworld
+      - cockpit
+      - cockpit-machines
+      - cockpit-podman
+      - cockpit-files
+      - cockpit-networkmanager
+      - cockpit-selinux
+      - cockpit-packagekit
+      - cockpit-storaged
+      - cockpit-pcp
+      - pcp
+      - python3-pcp
+      - pcp-system-tools
+      - tuned
+      - sysstat
+      - firewalld
+      - iptables
+      - openssh-server
+      - cryptsetup
+      - lvm2
+      - mdadm
+      - policycoreutils-python-utils
+      - setroubleshoot-server
+      - audit
+      - setools-console
+      - fwupd
+      - amd-ucode-firmware
+      - microcode_ctl
+      - osbuild-composer
+      - composer-cli
+    remove:
+      - firefox
+      - firefox-langpacks
+      - gnome-calculator
+      - gnome-contacts
+      - gnome-maps
+      - totem
+      - yelp
+      - gnome-text-editor
+      - gnome-tour
+      - gnome-shell-extension-background-logo
+      - rhythmbox
+      - baobab
 
-    type: dnf repos: copr: - atim/starship
+  - type: dnf
+    repos:
+      copr:
+        - atim/starship
 
-    type: systemd enable:
-        libvirtd.service
-        virtlogd.service
-        virtqemud.service
-        sshd.service
-        cockpit.socket
-        firewalld.service
-        tuned.service
+  - type: systemd
+    enable:
+      - libvirtd.service
+      - virtlogd.service
+      - virtqemud.service
+      - sshd.service
+      - cockpit.socket
+      - firewalld.service
+      - tuned.service
+      - pmcd.service
+      - pmlogger.service
+      - auditd.service
 
-    type: default-flatpaks configurations:
-        notify: true scope: system install:
-            io.podman_desktop.PodmanDesktop remove:
-            org.mozilla.firefox
-
-    type: custom name: coreos-tuning files:
-        path: /etc/hostname content: ShardOS-CoreOS mode: '0644'
-
-what is the new YAML for the new recipe?
-
-name: ShardOS description: Specialized host image for high-performance VMs and containers with dGPU passthrough and Image Building capabilities. base-image: ghcr.io/ublue-os/silverblue-beta-zen image-version: latest
-
-modules:
-
-    type: files files:
-        source: system destination: /
-
-    type: rpm-ostree install:
-        https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
-        https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-        ublue-update
-        micro
-        starship
-        qemu-kvm
-        libvirt
-        libvirt-client
-        libvirt-daemon-kvm
-        libvirt-daemon-config-network
-        virt-install
-        edk2-ovmf
-        virt-viewer
-        podman
-        skopeo
-        buildah
-        podman-compose
-        podman-docker
-        containers-tools
-        libavcodec-freeworld
-        cockpit
-        cockpit-machines
-        cockpit-podman
-        cockpit-files
-        cockpit-networkmanager
-        cockpit-selinux
-        cockpit-packagekit
-        cockpit-storaged
-        cockpit-pcp
-        pcp
-        python3-pcp
-        pcp-system-tools
-        tuned
-        sysstat
-        firewalld
-        iptables
-        openssh-server
-        cryptsetup
-        lvm2
-        mdadm
-        policycoreutils-python-utils
-        setroubleshoot-server
-        audit
-        setools-console
-        fwupd
-        amd-ucode-firmware
-        microcode_ctl
-        osbuild-composer
-        composer-cli remove:
-        firefox
-        firefox-langpacks
-        gnome-calculator
-        gnome-contacts
-        gnome-maps
-        totem
-        yelp
-        gnome-text-editor
-        gnome-tour
-        gnome-shell-extension-background-logo
-        rhythmbox
-        baobab
-
-    type: dnf repos: copr: - atim/starship
-
-    type: systemd enable:
-        libvirtd.service
-        virtlogd.service
-        virtqemud.service
-        sshd.service
-        cockpit.socket
-        firewalld.service
-        tuned.service
-        pmcd.service
-        pmlogger.service
-        auditd.service
-
-    type: default-flatpaks configurations:
-        notify: true scope: system install:
-            app.zen_browser.zen
-            org.gnome.Loupe
-            io.podman_desktop.PodmanDesktop
-            org.virt_manager.VirtManager
-            io.github.kolunmi.Bazaar remove:
-            org.mozilla.firefox
-        scope: user
-
-name: ShardOS-CoreOS-Atomic-Variant description: Minimal atomic/CoreOS-style variant of ShardOS targeted at Fedora CoreOS / CoreOS-style immutable bases. base-image: quay.io/coreos/fedora-coreos:latest image-version: latest
-
-build: sign: false
-
-modules:
-
-    type: files files:
-        source: system destination: /
-
-    type: rpm-ostree install:
-        micro
-        starship
-        qemu-kvm
-        libvirt
-        libvirt-client
-        libvirt-daemon-kvm
-        libvirt-daemon-config-network
-        virt-install
-        edk2-ovmf
-        virt-viewer
-        podman
-        skopeo
-        buildah
-        podman-compose
-        podman-docker
-        containers-tools
-        osbuild-composer
-        composer-cli
-        cockpit
-        openssh-server
-        tuned
-        sysstat
-        firewalld remove:
-        firefox
-        firefox-langpacks
-        gnome-calculator
-        gnome-contacts
-
-    type: dnf repos: copr: - atim/starship
-
-    type: systemd enable:
-        libvirtd.service
-        virtlogd.service
-        virtqemud.service
-        sshd.service
-        cockpit.socket
-        firewalld.service
-        tuned.service
-
-    type: default-flatpaks configurations:
-        notify: true scope: system install:
-            io.podman_desktop.PodmanDesktop remove:
-            org.mozilla.firefox
-
-    type: custom name: coreos-tuning files:
-        path: /etc/hostname content: ShardOS-CoreOS mode: '0644'
+  - type: default-flatpaks
+    configurations:
+      - notify: true
+        scope: system
+        install:
+          - app.zen_browser.zen
+          - org.gnome.Loupe
+          - io.podman_desktop.PodmanDesktop
+          - org.virt_manager.VirtManager
+          - io.github.kolunmi.Bazaar
+        remove:
+          - org.mozilla.firefox
+      - scope: user
