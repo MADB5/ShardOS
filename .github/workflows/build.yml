@@ -30,41 +30,16 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Determine build options for signing
+      - name: Determine build options for signing (force no-sign)
         id: set_build_opts
         shell: bash
         run: |
-          # If either public or private cosign key is provided via secrets,
-          # enable signing (leave build_opts empty). Otherwise force --no-sign.
-          if [ -n "${{ secrets.COSIGN_PUB }}" ] || [ -n "${{ secrets.COSIGN_PRIVATE_KEY }}" ]; then
-            echo "build_opts=" >> "$GITHUB_OUTPUT"
-          else
-            echo "build_opts=--no-sign" >> "$GITHUB_OUTPUT"
-          fi
+          # Force-disable signing unconditionally
+          echo "build_opts=--no-sign" >> "$GITHUB_OUTPUT"
 
-      - name: Inject cosign public key (if provided)
-        shell: bash
-        run: |
-          # Write cosign.pub only when the secret is present; preserve exact content.
-          if [ -n "${{ secrets.COSIGN_PUB }}" ]; then
-            printf '%s' "${{ secrets.COSIGN_PUB }}" > ./cosign.pub
-            chmod 644 ./cosign.pub
-            echo "WROTE_PUBLIC_KEY=1" >> "$GITHUB_OUTPUT"
-          else
-            echo "WROTE_PUBLIC_KEY=0" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Inject cosign private key (if provided - sensitive)
-        shell: bash
-        run: |
-          # Only write private key when explicitly provided. Prefer keyless signing via OIDC.
-          if [ -n "${{ secrets.COSIGN_PRIVATE_KEY }}" ]; then
-            printf '%s' "${{ secrets.COSIGN_PRIVATE_KEY }}" > ./cosign.key
-            chmod 600 ./cosign.key
-            echo "WROTE_PRIVATE_KEY=1" >> "$GITHUB_OUTPUT"
-          else
-            echo "WROTE_PRIVATE_KEY=0" >> "$GITHUB_OUTPUT"
-          fi
+      # Removed: Inject cosign public key (if provided)
+      # Removed: Inject cosign private key (if provided - sensitive)
+      # (No cosign secrets or COSIGN_PASSWORD will be used)
 
       - name: Build Custom Image
         uses: blue-build/github-action@v1.10.2
@@ -75,7 +50,6 @@ jobs:
           pr_event_number: ${{ github.event.number }}
         env:
           BUILD_OPTS: ${{ steps.set_build_opts.outputs.build_opts }}
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
 
-      - name: Build and sign image
+      - name: Build and sign image (force no-sign)
         run: bluebuild build --no-sign
