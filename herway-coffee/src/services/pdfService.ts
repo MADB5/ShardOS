@@ -10,7 +10,7 @@ function buildInvoiceHtml(invoice: Invoice): string {
       (item) => `
       <tr>
         <td>${item.productName}</td>
-        <td style="text-align:center">${item.quantity} ${item.productId}</td>
+        <td style="text-align:center">${item.quantity}</td>
         <td style="text-align:right">$${item.unitPrice.toFixed(2)}</td>
         <td style="text-align:center">${item.discount}%</td>
         <td style="text-align:right">$${item.total.toFixed(2)}</td>

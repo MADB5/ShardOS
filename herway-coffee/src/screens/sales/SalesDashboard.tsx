@@ -35,42 +35,42 @@ export default function SalesDashboard({ navigation }: any) {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  async function loadLocal() {
-    const [c, inv, queue] = await Promise.all([
-      getLocalCustomers(),
-      getLocalInvoices(),
-      getSyncQueue(),
-    ]);
-    const filtered = c.filter((x) => x.marketId === user?.marketId);
-    const filteredInv = inv.filter((x) => x.marketId === user?.marketId);
-    setCustomers(filtered);
-    setInvoices(filteredInv);
-    setPendingCount(queue.length);
-  }
-
-  async function syncData() {
-    if (!user) return;
-    setSyncStatus('syncing');
-    try {
-      const queue = await getSyncQueue();
-      if (queue.length > 0 && isOnline) {
-        await syncToFirestore(db, queue, async (id) => {
-          const { clearSyncQueueItem } = await import('../../services/storageService');
-          await clearSyncQueueItem(id);
-        });
-      }
-      if (isOnline) {
-        await fetchFromFirestore(db, user.marketId, user.role);
-      }
-      await loadLocal();
-      setSyncStatus(isOnline ? 'online' : 'offline');
-    } catch {
-      setSyncStatus('error');
-    }
-  }
-
   useFocusEffect(
     useCallback(() => {
+      async function loadLocal() {
+        const [c, inv, queue] = await Promise.all([
+          getLocalCustomers(),
+          getLocalInvoices(),
+          getSyncQueue(),
+        ]);
+        const filtered = c.filter((x) => x.marketId === user?.marketId);
+        const filteredInv = inv.filter((x) => x.marketId === user?.marketId);
+        setCustomers(filtered);
+        setInvoices(filteredInv);
+        setPendingCount(queue.length);
+      }
+
+      async function syncData() {
+        if (!user) return;
+        setSyncStatus('syncing');
+        try {
+          const queue = await getSyncQueue();
+          if (queue.length > 0 && isOnline) {
+            await syncToFirestore(db, queue, async (id) => {
+              const { clearSyncQueueItem } = await import('../../services/storageService');
+              await clearSyncQueueItem(id);
+            });
+          }
+          if (isOnline) {
+            await fetchFromFirestore(db, user.marketId, user.role);
+          }
+          await loadLocal();
+          setSyncStatus(isOnline ? 'online' : 'offline');
+        } catch {
+          setSyncStatus('error');
+        }
+      }
+
       async function init() {
         setLoading(true);
         await loadLocal();
@@ -83,7 +83,26 @@ export default function SalesDashboard({ navigation }: any) {
 
   async function handleRefresh() {
     setRefreshing(true);
-    await syncData();
+    try {
+      const queue = await getSyncQueue();
+      setSyncStatus('syncing');
+      if (queue.length > 0 && isOnline) {
+        await syncToFirestore(db, queue, async (id) => {
+          const { clearSyncQueueItem } = await import('../../services/storageService');
+          await clearSyncQueueItem(id);
+        });
+      }
+      if (isOnline && user) {
+        await fetchFromFirestore(db, user.marketId, user.role);
+      }
+      const [c, inv, q] = await Promise.all([getLocalCustomers(), getLocalInvoices(), getSyncQueue()]);
+      setCustomers(c.filter((x) => x.marketId === user?.marketId));
+      setInvoices(inv.filter((x) => x.marketId === user?.marketId));
+      setPendingCount(q.length);
+      setSyncStatus(isOnline ? 'online' : 'offline');
+    } catch {
+      setSyncStatus('error');
+    }
     setRefreshing(false);
   }
 

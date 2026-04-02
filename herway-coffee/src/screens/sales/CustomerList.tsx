@@ -13,7 +13,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import SearchBar from '../../components/SearchBar';
 import DeleteConfirmModal from '../shared/DeleteConfirmModal';
 import { getCustomers as getLocalCustomers, saveCustomers, addToSyncQueue, saveDeletionLog } from '../../services/storageService';
-import { deleteCustomer } from '../../services/firestoreService';
 import { Customer } from '../../types';
 import { formatDate, generateId } from '../../utils/helpers';
 
